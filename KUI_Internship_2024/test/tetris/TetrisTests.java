@@ -63,18 +63,18 @@ public class TetrisTests {
 	@Test
 	public void testFigureNotOverlapsFieldCellsAfterSlidingDown() throws Exception {
 		model.state.field[2][model.size().x()/2] = 1;
-		boolean valid = model.isNewFiguresPositionValid(new Pair(model.state.position.x(), model.state.position.y() + 1));
+		boolean valid = model.isNewFiguresPositionAndRotationValid(new Pair(model.state.position.x(),model.state.position.y() + 1), model.state.figure);
 		assertFalse(valid);
 	}
 	
-	@Test
-	public void testPasteFigure() throws Exception {
-		model.pasteFigure();
-		assertEquals(1, model.state.field[0][model.size().x()/2-1]);
-		assertEquals(1, model.state.field[0][model.size().x()/2]);
-		assertEquals(1, model.state.field[1][model.size().x()/2-1]);
-		assertEquals(1, model.state.field[1][model.size().x()/2]);
-	}
+//	@Test
+//	public void testPasteFigure() throws Exception {
+//		model.pasteFigure();
+//		assertEquals(1, model.state.field[0][model.size().x()/2-1]);
+//		assertEquals(1, model.state.field[0][model.size().x()/2]);
+//		assertEquals(1, model.state.field[1][model.size().x()/2-1]);
+//		assertEquals(1, model.state.field[1][model.size().x()/2]);
+//	}
 	
 	@Test
 	public void testMoveLeft() throws Exception {

@@ -42,16 +42,11 @@ public class TetrisModel implements GameEventsListener {
 	@Override
 	public void slideDown() {
 		var newPosition = new Pair(state.position.x(), state.position.y() + 1);
-		if (isNewFiguresPositionValid(newPosition)) {
+		if (isNewFiguresPositionAndRotationValid(newPosition, state.figure)) {
 			state.position = newPosition;
 			notifyListeners();
 		} else {
-			pasteFigure();
-			initFigure();
-			notifyListeners();
-			if (!isNewFiguresPositionValid(state.position)) {
-				gameOver();
-			}
+			pasteInitAndCheckGameOver();
 		}
 	}
 
@@ -67,7 +62,7 @@ public class TetrisModel implements GameEventsListener {
 	@Override
 	public void moveLeft() {
 		var newPosition = new Pair(state.position.x() - 1, state.position.y());
-		if (isNewFiguresPositionValid(newPosition)) {
+		if (isNewFiguresPositionAndRotationValid(newPosition, state.figure)) {
 			state.position = newPosition;
 			notifyListeners();
 		}
@@ -76,7 +71,7 @@ public class TetrisModel implements GameEventsListener {
 	@Override
 	public void moveRight() {
 		var newPosition = new Pair(state.position.x() + 1, state.position.y());
-		if (isNewFiguresPositionValid(newPosition)) {
+		if (isNewFiguresPositionAndRotationValid(newPosition, state.figure)) {
 			state.position = newPosition;
 			notifyListeners();
 		}
@@ -90,23 +85,39 @@ public class TetrisModel implements GameEventsListener {
 				f[c][3 - r] = state.figure[r][c];
 			}
 		}
-		state.figure = f;
-		notifyListeners();
+		if(isNewFiguresPositionAndRotationValid(state.position, f)){
+			state.figure = f;
+			notifyListeners();
+		}
 	}
 
 	@Override
 	public void drop() {
-		// TODO Auto-generated method stub
+		var newPosition = new Pair(state.position.x(), state.position.y() + 1);
+		while (isNewFiguresPositionAndRotationValid(newPosition, state.figure)) {
+			state.position = newPosition;
+			newPosition = new Pair(state.position.x(), state.position.y() + 1);
+		}
 
-		notifyListeners();
+		pasteInitAndCheckGameOver();
 	}
 
-	public boolean isNewFiguresPositionValid(Pair newPosition) {
+	private void pasteInitAndCheckGameOver() {
+		pasteFigure();
+		initFigure();
+		checkAndRemoveRows();
+		notifyListeners();
+		if (!isNewFiguresPositionAndRotationValid(state.position, state.figure)) {
+			gameOver();
+		}
+	}
+
+	public boolean isNewFiguresPositionAndRotationValid(Pair newPosition, int[][] figure) {
 
 		boolean[] result = new boolean[1];
 		result[0] = true;
 
-		walkThroughAllFigureCells(newPosition, (absPos, relPos) -> {
+		walkThroughAllFigureCells(newPosition, figure,(absPos, relPos) -> {
 			if (result[0]) {
 				result[0] = checkAbsPos(absPos);
 			}
@@ -115,10 +126,10 @@ public class TetrisModel implements GameEventsListener {
 		return result[0];
 	}
 
-	private void walkThroughAllFigureCells(Pair newPosition, BiConsumer<Pair, Pair> payload) {
-		for (int row = 0; row < state.figure.length; row++) {
-			for (int col = 0; col < state.figure[row].length; col++) {
-				if (state.figure[row][col] == 0)
+	private void walkThroughAllFigureCells(Pair newPosition,int[][] figure, BiConsumer<Pair, Pair> payload) {
+		for (int row = 0; row < figure.length; row++) {
+			for (int col = 0; col < figure[row].length; col++) {
+				if (figure[row][col] == 0)
 					continue;
 				int absCol = newPosition.x() + col;
 				int absRow = newPosition.y() + row;
@@ -148,9 +159,44 @@ public class TetrisModel implements GameEventsListener {
 	}
 
 	public void pasteFigure() {
-		walkThroughAllFigureCells(state.position, (absPos, relPos) -> {
+		walkThroughAllFigureCells(state.position, state.figure,(absPos, relPos) -> {
 			state.field[absPos.y()][absPos.x()] = state.figure[relPos.y()][relPos.x()];
 		});
+
+	}
+
+	private void checkAndRemoveRows(){
+		for(int row = 0; row < state.height; row++){
+			if(isRowRemovable(row)){
+				removeRow(row);
+			}
+		}
+		notifyListeners();
+	}
+
+	private boolean isRowRemovable(int row){
+		for(int col = 0; col < state.width; col++) {
+			if (state.field[row][col] == 0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void removeRow(int row){
+		int startRow = row - 1;
+
+		while (startRow != -1) {
+			for(int col = 0; col < state.width; col++) {
+				state.field[startRow + 1][col] = state.field[startRow][col];
+			}
+			startRow -= 1;
+		}
+
+
+		for(int col = 0; col < state.width; col++) {
+			state.field[0][col] = 0;
+		}
 	}
 
 }
