@@ -1,6 +1,6 @@
 package columns;
 
-import java.awt.Container;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Model {
@@ -18,26 +18,38 @@ public class Model {
 	public int[][] oldField;
 	public boolean noChanges = true;
 	
-	private List<ModelListener> listeners;
+	List<ModelListener> listeners = new ArrayList<>();
 
-	void dropFigure(Columns columns, Figure f) {
+	void dropFigure(Figure f) {
 		int zz;
 		if (f.y < Model.Depth - 2) {
+			int oldX = Fig.x;
+			int oldY = Fig.y;
 			zz = Model.Depth;
 			while (newField[f.x][zz] > 0)
 				zz--;
 			DropScore = (((level + 1) * (Model.Depth * 2 - f.y - zz) * 2) % 5) * 5;
 			f.y = zz - 2;
+			fireFigureMovedEvent(oldX, oldY);
+			processFigureCantMoveDown();
 		}
 	}
 
-	boolean isFieldFull(Columns columns) {
+	void checkIfFieldIsFull() {
 		int i;
 		for (i = 1; i <= Model.Width; i++) {
-			if (newField[i][3] > 0)
-				return true;
+			if (newField[i][3] > 0) {
+				fireGameOver();
+				return;
+			}
 		}
-		return false;
+		createNewFigure();
+	}
+
+	private void fireGameOver() {
+		for (ModelListener modelListener : listeners) {
+			modelListener.gameOver();
+		}
 	}
 
 	void initModel() {
@@ -58,8 +70,12 @@ public class Model {
 			for (int k = n; k > 0; k--)
 				newField[i][k] = 0;
 		}
+		fireFieldUpdated();
+	}
+
+	private void fireFieldUpdated() {
 		for (ModelListener modelListener : listeners) {
-			modelListener.fieldIsPacked(newField);
+			modelListener.fieldUpdated(newField);
 		}
 	}
 
@@ -78,11 +94,12 @@ public class Model {
 		}
 	}
 
-	void PasteFigure(Figure f) {
+	void pasteFigure(Figure f) {
 		int[] c = f.getCells();
 		newField[f.x][f.y] = c[0];
 		newField[f.x][f.y + 1] = c[1];
 		newField[f.x][f.y + 2] = c[2];
+		fireFieldUpdated();
 	}
 
 	boolean mayFigureSlideDown() {
@@ -116,12 +133,13 @@ public class Model {
 		}
 	}
 
-	boolean trySlideDown() {
+	void trySlideDown() {
 		if (mayFigureSlideDown()) {
 			Fig.y++;
-			return true;
-		} else
-			return false;
+			fireFigureMovedEvent(Fig.x, Fig.y - 1);
+		} else {
+			processFigureCantMoveDown();
+		}
 	}
 
 	public void addListener(ModelListener listener) {
@@ -182,5 +200,65 @@ public class Model {
 			increaseLevel();
 		}
 	}
+
+	void tryMoveLeft() {
+		int oldX = Fig.x;
+		int oldY = Fig.y;
+		if ((Fig.x > 1) && (newField[Fig.x - 1][Fig.y + 2] == 0)) {
+			Fig.x--;
+			fireFigureMovedEvent(oldX, oldY);
+	//			moveAndDrawFigure(oldX, oldY);
+		}
+	}
+
+	void tryMoveRight() {
+		int oldX = Fig.x;
+		int oldY = Fig.y;
+		if ((oldX < Model.Width) && (newField[oldX + 1][oldY + 2] == 0)) {
+			Fig.x++;
+			fireFigureMovedEvent(oldX, oldY);
+		}
+	}
+
+	private void fireFigureMovedEvent(int oldX, int oldY) {
+		for (ModelListener modelListener : listeners) {
+			modelListener.figureMovedFrom(oldX, oldY);
+		}
+	}
+
+	void rotateDown() {
+		Fig.rotateFigureCellsRight();
+		fireUpdateFigure();
+	}
+
+	private void fireUpdateFigure() {
+		for (ModelListener modelListener : listeners) {
+			modelListener.figureUpdated(Fig);
+		}
+	}
+
+	void rotateUp() {
+		Fig.rotateFigureCellsLeft();
+		fireUpdateFigure();
+	}
+
+	void removeSimilarCellsRepeatedly() {
+		do {
+			removeSimilarNeighboringCells();
+		} while (!noChanges);
+	}
+
+	void createNewFigure() {
+		Fig = new Figure();
+		fireUpdateFigure();
+	}
+
+	void processFigureCantMoveDown() {
+		DropScore = 0;
+		pasteFigure(Fig);
+		removeSimilarCellsRepeatedly();
+		checkIfFieldIsFull();
+	}
+
 
 }
