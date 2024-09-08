@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class PeptidesTest {
 
-	private Peptides peptides;
+	private PeptidesApproach1 peptides;
 	private String peptide;
 	private String protein;
 
@@ -19,7 +19,7 @@ public class PeptidesTest {
 		peptide = "RNLKDGHI";
 		protein = "ABERNLKDGHIHWEPOGCVNWOORNLKDGHIMXVNXMCWERY";
 		var library = List.of(peptide, "ORNLKDGH", "ABCDEFGH");
-		peptides = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, protein, library);
+		peptides = new PeptidesApproach1(PeptidesApproach1.DEFAULT_PEPTIDE_SIZE, protein, library);
 	}
 	
 	@Test
@@ -42,7 +42,7 @@ public class PeptidesTest {
 	
 	@Test
 	public void testSearchLibraryPeptidesIsEmpty() throws Exception {
-		peptides = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, protein, List.of("HELLO", "BELLO"));
+		peptides = new PeptidesApproach1(PeptidesApproach1.DEFAULT_PEPTIDE_SIZE, protein, List.of("HELLO", "BELLO"));
 		Map<String, List<Integer>> existingPeptides = peptides.searchLibrary();
 		assertNotNull(existingPeptides);
 		assertTrue(existingPeptides.isEmpty());

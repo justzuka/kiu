@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Peptides {
+public class PeptidesApproach1 implements IPeptides {
 
 	public static final int DEFAULT_PEPTIDE_SIZE = 8;
 
@@ -17,7 +17,7 @@ public class Peptides {
 
 	private List<String> library;
 
-	public Peptides(int peptideSize, String protein, List<String> library) {
+	public PeptidesApproach1(int peptideSize, String protein, List<String> library) {
 		this.peptideSize = peptideSize;
 		this.protein = protein;
 		this.library = library;
