@@ -43,4 +43,11 @@ public class ChatServer {
 		}
 	}
 
+	public void removeMember(ChatMember member) {
+		synchronized (members) {
+			members.remove(member); // Remove the member from the list
+		}
+		publish(member.getName() + " has left the chat."); // Notify others that the member has left
+	}
+
 }

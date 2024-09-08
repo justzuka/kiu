@@ -17,7 +17,9 @@ public class ChatMember {
 	private PrintWriter printer;
 
 	private WorkerThread sendingWorker;
-
+	public String getName(){
+		return name;
+	}
 	public ChatMember(ChatServer server) {
 		this.server = server;
 	}
@@ -68,7 +70,10 @@ public class ChatMember {
 		}
 			break;
 		case "exit": {
-			// TODO: homework
+			if (name != null) {
+				server.publish(name + " has left the chat.");
+			}
+			closeConnection();
 		}
 			break;
 		default: {
@@ -92,5 +97,18 @@ public class ChatMember {
 		printer.println(message);
 		printer.flush();
 	}
+
+	private void closeConnection() {
+		try {
+			if (printer != null) {
+				printer.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			server.removeMember(this); // Notify server to remove this member from the active list
+		}
+	}
+
 
 }

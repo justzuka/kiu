@@ -5,28 +5,26 @@ import java.util.List;
 
 public class BlockingQueue<T> {
 
-	List<T> items = new ArrayList<>();
+	private final List<T> items = new ArrayList<>();
+	private final Object mutex = new Object();
 
-	Object mutex = new Object();
-	
 	public void put(T item) {
-		items.add(item);
 		synchronized (mutex) {
-			mutex.notify();
+			items.add(item);
+			mutex.notify(); // Notify waiting threads that an item has been added
 		}
 	}
 
-	
 	public T get() {
-		while (items.isEmpty()) {
-			synchronized (mutex) {
+		synchronized (mutex) {
+			while (items.isEmpty()) {
 				try {
-					mutex.wait();
+					mutex.wait(); // Wait until an item is available
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					Thread.currentThread().interrupt(); // Restore interrupted state
 				}
 			}
+			return items.remove(0); // Return the first item from the list
 		}
-		return items.remove(0);
 	}
 }
