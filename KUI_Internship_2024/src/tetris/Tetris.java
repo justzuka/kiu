@@ -45,6 +45,42 @@ public class Tetris {
 				graphics.fillRect(i, j, View.BOX_SIZE, View.BOX_SIZE);
 			}
 
+			@Override
+			public void drawString(String text, int x, int y){
+				int textWidth = graphics.getFontMetrics().stringWidth(text) + 20;
+				int textHeight = graphics.getFontMetrics().getHeight() + 20;
+
+				graphics.setColor(Color.WHITE);
+				graphics.fillRect(x - 10, y - textHeight / 2, textWidth, textHeight);
+
+				graphics.setColor(Color.black);
+				graphics.drawString(text, x, y);
+			}
+
+			@Override
+			public void drawGameOver(){
+				String gameOverText = "Game Over";
+
+				// Calculate the dimensions of the "Game Over" text
+				int textWidth = graphics.getFontMetrics().stringWidth(gameOverText);
+				int textHeight = graphics.getFontMetrics().getHeight();
+
+				int screenWidth = panel.getWidth();
+				int screenHeight = panel.getHeight();
+
+				// Calculate the center position of the screen for the text
+				int centerX = (screenWidth / 2) - (textWidth / 2);
+				int centerY = (screenHeight / 2) + (textHeight / 2);
+
+				// Draw a semi-transparent background rectangle behind the text
+				graphics.setColor(new Color(255, 255, 255, 128)); // White with 50% transparency
+				graphics.fillRect(centerX - 10, centerY - textHeight, textWidth + 20, textHeight + 10); // Padding of 10 pixels
+
+				// Draw the "Game Over" text in black
+				graphics.setColor(Color.BLACK);
+				graphics.drawString(gameOverText, centerX, centerY);
+			}
+
 		});
 
 		Controller controller = new Controller(model, view);
@@ -73,7 +109,20 @@ public class Tetris {
 						if (period > 100) { // Minimum period of 100ms to prevent too high speed
 							period -= 100; // Decrease the period by 100ms
 							rescheduleTask(controller);
+							model.increaseLevel();
 						}
+						break;
+					}
+					case KeyEvent.VK_W: {
+						if (period < 1000) { // Minimum period of 100ms to prevent too high speed
+							period += 100; // Decrease the period by 100ms
+							rescheduleTask(controller);
+							model.decreaseLevel();
+						}
+						break;
+					}
+					case KeyEvent.VK_R: {
+						controller.restartGame();
 						break;
 					}
 				}

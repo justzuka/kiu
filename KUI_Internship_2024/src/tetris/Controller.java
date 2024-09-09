@@ -41,4 +41,19 @@ public class Controller implements ModelListener, GameEventsListener {
 		model.drop();
 	}
 
+	@Override
+	public void increaseLevel() {
+		model.increaseLevel();
+	}
+
+	@Override
+	public void decreaseLevel() {
+		model.decreaseLevel();
+	}
+
+	@Override
+	public void restartGame() {
+		model.restartGame();
+	}
+
 }

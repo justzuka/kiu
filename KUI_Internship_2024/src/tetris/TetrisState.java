@@ -7,6 +7,11 @@ public class TetrisState {
 	public int[][] figure;
 	public Pair position;
 
+	public int level = 1;
+
+	public int score;
+	public boolean gameOver = false;
+
 	public TetrisState() {
 	}
 }

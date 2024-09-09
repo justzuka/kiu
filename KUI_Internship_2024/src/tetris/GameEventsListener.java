@@ -7,6 +7,10 @@ public interface GameEventsListener {
 	void moveRight();
 	void rotate();
 	void drop();
-	
 
+	void increaseLevel();
+
+	void decreaseLevel();
+
+	void restartGame();
 }

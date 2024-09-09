@@ -41,6 +41,7 @@ public class TetrisModel implements GameEventsListener {
 
 	@Override
 	public void slideDown() {
+		if (state.gameOver) return;
 		var newPosition = new Pair(state.position.x(), state.position.y() + 1);
 		if (isNewFiguresPositionAndRotationValid(newPosition, state.figure)) {
 			state.position = newPosition;
@@ -55,7 +56,8 @@ public class TetrisModel implements GameEventsListener {
 	}
 
 	private void gameOver() {
-		// TODO Auto-generated method stub
+		state.gameOver = true;
+		notifyListeners();
 
 	}
 
@@ -100,6 +102,27 @@ public class TetrisModel implements GameEventsListener {
 		}
 
 		pasteInitAndCheckGameOver();
+	}
+
+	@Override
+	public void increaseLevel() {
+		state.level += 1;
+		notifyListeners();
+	}
+
+	@Override
+	public void decreaseLevel() {
+		state.level -= 1;
+		notifyListeners();
+	}
+
+	@Override
+	public void restartGame() {
+		state.gameOver = false;
+		state.score = 0;
+		state.field = new int[state.height][state.width];
+
+		initFigure();
 	}
 
 	private void pasteInitAndCheckGameOver() {
@@ -169,6 +192,7 @@ public class TetrisModel implements GameEventsListener {
 		for(int row = 0; row < state.height; row++){
 			if(isRowRemovable(row)){
 				removeRow(row);
+
 			}
 		}
 		notifyListeners();
@@ -193,7 +217,7 @@ public class TetrisModel implements GameEventsListener {
 			startRow -= 1;
 		}
 
-
+		state.score += 10;
 		for(int col = 0; col < state.width; col++) {
 			state.field[0][col] = 0;
 		}
