@@ -154,14 +154,13 @@ public class Columns extends JPanel implements Runnable, KeyListener {
         do {
             tc = System.currentTimeMillis();
             Fig = new Figure();
-//            DrawFigure(Fig);
             repaint();
+            boolean dropped = false;
             while ((Fig.y < Depth - 2) && (Fnew[Fig.x][Fig.y + 3] == 0)) {
                 if ((int) (System.currentTimeMillis() - tc) > (MaxLevel - Level) * TimeShift + MinTimeShift) {
                     tc = System.currentTimeMillis();
                     HideFigure(Fig);
                     Fig.y++;
-//                    DrawFigure(Fig);
                     repaint();
 
                 }
@@ -174,11 +173,9 @@ public class Columns extends JPanel implements Runnable, KeyListener {
                         KeyPressed = false;
                         switch (ch) {
                             case KeyEvent.VK_LEFT:
-                                System.out.println("left");
                                 if ((Fig.x > 1) && (Fnew[Fig.x - 1][Fig.y + 2] == 0)) {
                                     HideFigure(Fig);
                                     Fig.x--;
-//                                    DrawFigure(Fig);
                                     repaint();
 
                                 }
@@ -187,7 +184,6 @@ public class Columns extends JPanel implements Runnable, KeyListener {
                                 if ((Fig.x < Width) && (Fnew[Fig.x + 1][Fig.y + 2] == 0)) {
                                     HideFigure(Fig);
                                     Fig.x++;
-//                                    DrawFigure(Fig);
                                     repaint();
 
                                 }
@@ -197,7 +193,6 @@ public class Columns extends JPanel implements Runnable, KeyListener {
                                 Fig.c[1] = Fig.c[2];
                                 Fig.c[2] = Fig.c[3];
                                 Fig.c[3] = i;
-//                                DrawFigure(Fig);
                                 repaint();
 
                                 break;
@@ -206,16 +201,14 @@ public class Columns extends JPanel implements Runnable, KeyListener {
                                 Fig.c[1] = Fig.c[3];
                                 Fig.c[3] = Fig.c[2];
                                 Fig.c[2] = i;
-//                                DrawFigure(Fig);
                                 repaint();
 
                                 break;
                             case KeyEvent.VK_SPACE:
                                 HideFigure(Fig);
                                 DropFigure(Fig);
-//                                DrawFigure(Fig);
                                 repaint();
-
+                                dropped = true;
                                 tc = 0;
                                 break;
                             case 'P':
@@ -223,25 +216,25 @@ public class Columns extends JPanel implements Runnable, KeyListener {
                                 while (!KeyPressed) {
                                     HideFigure(Fig);
                                     Delay(50);
-//                                    DrawFigure(Fig);
                                     repaint();
 
                                     Delay(50);
                                 }
                                 tc = System.currentTimeMillis();
                                 break;
-                            case '-':
+                            case KeyEvent.VK_W:
                                 if (Level > 0) Level--;
                                 k = 0;
                                 ShowLevel();
                                 break;
-                            case '+':
+                            case KeyEvent.VK_Q:
                                 if (Level < MaxLevel) Level++;
                                 k = 0;
                                 ShowLevel();
                                 break;
                         }
                     }
+                    if (dropped) break;
                 } while ((int) (System.currentTimeMillis() - tc) <= (MaxLevel - Level) * TimeShift + MinTimeShift);
             }
             PasteFigure(Fig);
